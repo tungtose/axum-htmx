@@ -1,3 +1,5 @@
+mod model;
+
 use anyhow::Context;
 use askama::Template;
 use axum::{

@@ -27,6 +27,7 @@
             just
             cargo-watch
             cargo-release
+            sqlx-cli
           ];
           env = {
             ZSTD_SYS_USE_PKG_CONFIG = true;

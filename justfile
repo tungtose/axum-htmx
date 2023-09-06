@@ -9,3 +9,14 @@ styles:
 
 dev:
   cargo watch -x 'run'
+
+export DATABASE_URL := "sqlite:todos.db"
+create-db:
+  sqlx db create
+
+create-migrate name:
+  sqlx migrate add {{name}}
+
+migrate:
+  sqlx migrate run
+

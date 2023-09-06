@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS todos
+(
+  id INTEGER PRIMARY KEY NOT NULL,
+  descriptions TEXT      NOT NULL,
+  done BOOLEAN           NOT NULL DEFAULT 0
+);
