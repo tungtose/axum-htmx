@@ -45,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
     let router = Router::new()
         .nest("/api", api_router)
         .route("/", get(hello))
-        .route("/about", get(another_page))
+        .route("/about", get(about))
         .with_state(app_state)
         .nest_service(
             "/assets",
@@ -67,7 +67,7 @@ async fn hello() -> impl IntoResponse {
     HtmlTemplate(template)
 }
 
-async fn another_page() -> impl IntoResponse {
+async fn about() -> impl IntoResponse {
     let template = AboutTemplate {};
     HtmlTemplate(template)
 }
