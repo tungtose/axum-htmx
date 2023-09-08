@@ -27,15 +27,30 @@ impl TaskBmc {
     pub async fn create(mm: &ModelManager, task_c: TaskForCreate) -> Result<i64> {
         let db = mm.db();
 
-        let (id,) = sqlx::query_as::<_, (i64,)>(
-            "INSERT INTO todos (descriptions) values ($1) returning id",
-        )
-        .bind(task_c.descriptions)
-        .fetch_one(db)
-        .await?;
+    let mut conn = db.acquire().await?;
+
+
+
+    let id = sqlx::query!(
+        r#"
+            INSERT INTO todos ( descriptions ) VALUES ( ?1 )
+        "#,
+        task_c.descriptions,
+    )
+    .execute(&mut *conn)
+    .await?
+    .last_insert_rowid();
+        
+
+        // let (id,) = sqlx::query_as::<_, (i64,)>(
+        //     "INSERT INTO todos (descriptions) values ($1) returning id",
+        // )
+        // .bind(task_c.descriptions)
+        // .fetch_one(db)
+        // .await?;
 
         // TODO: need to bench the insert
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        // std::thread::sleep(std::time::Duration::from_millis(50));
 
         Ok(id)
     }
