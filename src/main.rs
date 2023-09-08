@@ -9,15 +9,14 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use std::sync::{Arc, Mutex};
+use model::{
+    tasks::{Task, TaskBmc, TaskForCreate},
+    ModelManager,
+};
 use tracing::info;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use tower_http::services::ServeDir;
-
-struct AppState {
-    todos: Mutex<Vec<String>>,
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -36,19 +35,17 @@ async fn main() -> anyhow::Result<()> {
 
     let assets_path = std::env::current_dir().unwrap();
 
-    let api_router = Router::new()
-        .route("/hello", get(server_hellop))
-        .route("/todos", post(add_todo));
+    let mm = ModelManager::new().await?;
 
-    let app_state = Arc::new(AppState {
-        todos: Mutex::new(vec![]),
-    });
+    let api_router = Router::new()
+        .route("/hello", get(server_hello))
+        .route("/todos", post(add_todo));
 
     let router = Router::new()
         .nest("/api", api_router)
         .route("/", get(hello))
         .route("/about", get(about))
-        .with_state(app_state)
+        .with_state(mm)
         .nest_service(
             "/assets",
             ServeDir::new(format!("{}/assets", assets_path.to_str().unwrap())),
@@ -64,8 +61,15 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn hello() -> impl IntoResponse {
-    let template = HelloTemplate {};
+async fn hello(
+    State(mm): State<ModelManager>,
+) -> impl IntoResponse {
+    let tasks = TaskBmc::list(&mm).await.unwrap();
+    
+    info!("tasks: {:?}", tasks);
+
+    let template = HelloTemplate { tasks };
+
     HtmlTemplate(template)
 }
 
@@ -74,10 +78,8 @@ async fn about() -> impl IntoResponse {
     HtmlTemplate(template)
 }
 
-async fn server_hellop() -> &'static str {
-    info!("hello calling!");
-
-    "Hell0!"
+async fn server_hello() -> &'static str {
+    "Hello!"
 }
 
 #[derive(serde::Deserialize)]
@@ -86,16 +88,18 @@ struct TodoRequest {
 }
 
 async fn add_todo(
-    State(state): State<Arc<AppState>>,
+    State(mm): State<ModelManager>,
     Form(todo): Form<TodoRequest>,
 ) -> impl IntoResponse {
-    let mut lock = state.todos.lock().unwrap();
-
-    lock.push(todo.todo);
-
-    let template = TodoList {
-        todos: lock.clone(),
+    let task_c = TaskForCreate {
+        descriptions: todo.todo,
     };
+
+    let _id = TaskBmc::create(&mm, task_c).await;
+
+    let tasks = TaskBmc::list(&mm).await.unwrap();
+
+    let template = TodoList { tasks };
 
     HtmlTemplate(template)
 }
@@ -103,7 +107,7 @@ async fn add_todo(
 #[derive(Template)]
 #[template(path = "todo-list.html")]
 struct TodoList {
-    todos: Vec<String>,
+    tasks: Vec<Task>,
 }
 
 #[derive(Template)]
@@ -112,7 +116,9 @@ struct AboutTemplate;
 
 #[derive(Template)]
 #[template(path = "hello.html")]
-struct HelloTemplate;
+struct HelloTemplate {
+    tasks: Vec<Task>,
+}
 
 /// A wrapper type that we'll use to encapsulate HTML parsed by askama into valid HTML for axum to serve.
 struct HtmlTemplate<T>(T);
@@ -123,11 +129,8 @@ where
     T: Template,
 {
     fn into_response(self) -> Response {
-        // Attempt to render the template with askama
         match self.0.render() {
-            // If we're able to successfully parse and aggregate the template, serve it
             Ok(html) => Html(html).into_response(),
-            // If we're not, return an error or some bit of fallback HTML
             Err(err) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("Failed to render template. Error: {}", err),
