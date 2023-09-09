@@ -1,4 +1,16 @@
 <!---- prettier-ignore -->
 {%for task in tasks %}
-<p class="text-lg">{{ task.descriptions }}</p>
+<div class="flex mb-4 items-center">
+  <p class="w-full text-grey-darkest">{{ task.descriptions }}</p>
+  <button
+    class="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white text-green-900 border-green-900 hover:bg-green-900"
+  >
+    Done
+  </button>
+  <button
+    class="flex-no-shrink p-2 ml-2 border-2 rounded text-red-900 border-red-900 hover:text-white hover:bg-red-900"
+  >
+    Remove
+  </button>
+</div>
 {% endfor %}
