@@ -203,6 +203,7 @@ dependencies = [
  "askama",
  "axum",
  "axum-macros",
+ "dotenvy",
  "serde",
  "serde_json",
  "serde_with",

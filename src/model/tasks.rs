@@ -27,20 +27,17 @@ impl TaskBmc {
     pub async fn create(mm: &ModelManager, task_c: TaskForCreate) -> Result<i64> {
         let db = mm.db();
 
-    let mut conn = db.acquire().await?;
+        let mut conn = db.acquire().await?;
 
-
-
-    let id = sqlx::query!(
-        r#"
+        let id = sqlx::query!(
+            r#"
             INSERT INTO todos ( descriptions ) VALUES ( ?1 )
         "#,
-        task_c.descriptions,
-    )
-    .execute(&mut *conn)
-    .await?
-    .last_insert_rowid();
-        
+            task_c.descriptions,
+        )
+        .execute(&mut *conn)
+        .await?
+        .last_insert_rowid();
 
         // let (id,) = sqlx::query_as::<_, (i64,)>(
         //     "INSERT INTO todos (descriptions) values ($1) returning id",

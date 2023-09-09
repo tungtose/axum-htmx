@@ -1,6 +1,3 @@
-# Load env
-set dotenv-load
-
 format:
   prettier --write .
 
@@ -9,8 +6,6 @@ styles:
 
 dev:
   cargo watch -x 'run'
-
-export DATABASE_URL := "sqlite:todos.db"
 
 create-db:
   sqlx db create

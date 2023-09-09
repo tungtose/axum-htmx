@@ -1,6 +1,6 @@
 <!---- prettier-ignore -->
-{% extends "base.html" %} {% block title %}Hello!{% endblock %} {% block content
-%}
+{% extends "base.html" %} {% block title %}Hello!{% endblock %} 
+{% block content%}
 <div class="inline-flex flex-row space-x-2">
   <h1 class="text-green-800">Xin Chao</h1>
   <a
@@ -19,8 +19,7 @@
     Say Hello!
   </button>
 </div>
-{% include "todo-form.html" %} {% endblock %}
-<div 
-  id="tasks" 
-  hx-swap="innerHtml"
-/>
+
+{% include "todo-form.html" %} 
+
+{% endblock %}

@@ -24,4 +24,9 @@
     </button>
   </div>
 </form>
-<div id="todos" />
+
+<div id="todos"/>
+  {%for task in tasks %}
+    <p class="text-lg">{{ task.descriptions }}</p>
+  {% endfor %}
+</div?

@@ -18,3 +18,4 @@ tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.17", features = ["env-filter"] }
 sqlb = "0.3.8"
 axum-macros = "0.3.8"
+dotenvy = "0.15.7"
