@@ -17,6 +17,11 @@ pub struct TaskForCreate {
 }
 
 #[derive(Deserialize)]
+pub struct TaskForDelete {
+    pub id: i64,
+}
+
+#[derive(Deserialize)]
 pub struct TaskForUpdate {
     pub descriptions: Option<String>,
 }
@@ -75,5 +80,38 @@ impl TaskBmc {
             .await?;
 
         Ok(tasks)
+    }
+
+    pub async fn switch_done(mm: &ModelManager, id: i64) -> Result<()> {
+        let mut conn = mm.db().acquire().await?;
+
+        sqlx::query!(
+            r#"
+            UPDATE todos
+            SET done = NOT done
+            WHERE id = $1
+        "#,
+            id,
+        )
+        .execute(&mut *conn)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete(mm: &ModelManager, id: i64) -> Result<()> {
+        let mut conn = mm.db().acquire().await?;
+
+        sqlx::query!(
+            r#"
+            DELETE FROM todos WHERE id = $1;
+        "#,
+            id,
+        )
+        .execute(&mut *conn)
+        .await?
+        .last_insert_rowid();
+
+        Ok(())
     }
 }

@@ -3,6 +3,7 @@
   hx-target="#todos"
   hx-swap="innerHTML"
   class="max-w-md"
+  hx-on::after-request="this.reset()"
 >
   <div
     class="h-100 w-full flex items-center justify-center bg-teal-lightest font-iter"
@@ -27,30 +28,46 @@
         </div>
       </div>
       <div id="todos">
-        {%for task in tasks %}
+        {%for task in tasks %} {% if task.done %}
+        <div class="flex mb-4 items-center">
+          <p class="w-full line-through text-green-500">
+            {{task.descriptions}}
+          </p>
+          <button
+            hx-patch="/api/todos/{{task.id}}"
+            class="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white-900 text-grey-900 border-grey-900 hover:bg-grey-900"
+          >
+            Not Done
+          </button>
+          <button
+            class="flex-no-shrink p-2 ml-2 border-2 rounded text-red-900 border-red-900 hover:text-white hover:bg-red-900"
+            hx-delete="/api/todos/{{task.id}}"
+            hx-confirm="Are you sure you wish to delete this item?"
+          >
+            Remove
+          </button>
+        </div>
+
+        {% else %}
         <div class="flex mb-4 items-center">
           <p class="w-full text-grey-darkest">{{ task.descriptions }}</p>
           <button
+            hx-patch="/api/todos/{{task.id}}"
             class="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white text-green-900 border-green-900 hover:bg-green-900"
           >
             Done
           </button>
           <button
             class="flex-no-shrink p-2 ml-2 border-2 rounded text-red-900 border-red-900 hover:text-white hover:bg-red-900"
+            hx-delete="/api/todos/{{task.id}}"
+            hx-confirm="Are you sure you wish to delete this item?"
           >
             Remove
           </button>
         </div>
-        {% endfor %}
+
+        {% endif %} {% endfor %}
       </div>
-      <!-- <div class="flex mb-4 items-center"> -->
-      <!--   <p class="w-full line-through text-green">Submit Todo App Component to Tailwind Components</p> -->
-      <!--   <button -->
-      <!--     class="flex-no-shrink p-2 ml-4 mr-2 border-2 rounded hover:text-white text-grey border-grey hover:bg-grey">Not -->
-      <!--     Done</button> -->
-      <!--   <button -->
-      <!--     class="flex-no-shrink p-2 ml-2 border-2 rounded text-red border-red hover:text-white hover:bg-red">Remove</button> -->
-      <!-- </div> -->
     </div>
   </div>
 </form>
